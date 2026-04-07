@@ -13,7 +13,9 @@
       "Bash(pnpm typecheck:*)",
       "mcp__Claude_Preview__preview_start",
       "Bash(timeout 10 pnpm exec vite build)",
-      "Bash(curl -s http://localhost:5174/src/main.tsx)"
+      "Bash(curl -s http://localhost:5174/src/main.tsx)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm add:*)"
     ]
   }
 }

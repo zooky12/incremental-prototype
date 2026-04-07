@@ -10,9 +10,10 @@ export interface DungeonSlice {
   totalRunsCompleted: number
   dungeonPrestigeLevel: number
 
-  startRun: (dungeonId: string, depth: number) => void
+  startRun: (dungeonId: string, depth: number, maxHp: number, torchDuration: number) => void
   endRun: () => void
-  clickNode: (nodeId: string) => { hpLost: number; materialsGained: Record<string, number>; killed: boolean }
+  clickNode: (nodeId: string, clickDamage: number, armor: number) => { hpLost: number; materialsGained: Record<string, number>; killed: boolean }
+  destroyNode: (nodeId: string) => void
   tickDungeon: (delta: number) => void
   assignCore: (coreId: string, zone: CoreZone) => void
   addCore: (dungeonId: string) => void
@@ -25,11 +26,11 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
   totalRunsCompleted: 0,
   dungeonPrestigeLevel: 0,
 
-  startRun(dungeonId, depth) {
-    const balance = getBalance()
+  startRun(dungeonId, depth, maxHp, torchDuration) {
     const dungeon = getDungeonById(dungeonId)
     if (!dungeon) return
 
+    const balance = getBalance()
     const depthData = dungeon.depths[Math.min(depth - 1, dungeon.depths.length - 1)]
 
     // Build initial nodes from the depth's spawn groups
@@ -44,7 +45,6 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
 
         if (!entityDef) continue
 
-        // Assign positions based on spawn zone
         const x = spawnZoneToX(group.spawnZone, nodeIndex)
         const y = 0.3 + Math.random() * 0.4
 
@@ -67,10 +67,12 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
         depth,
         startedAt: Date.now(),
         nodes,
-        torchTimeRemaining: balance.dungeon.torchDurationSeconds,
-        hp: balance.dungeon.baseHp,
+        torchTimeRemaining: torchDuration,
+        hp: maxHp,
+        maxHp,
         stability: balance.dungeon.maxStability,
         materialsGained: {},
+        nextEnemySpawnAt: Date.now() + (depthData.enemySpawnIntervalSeconds ?? 15) * 1000,
       },
     })
   },
@@ -79,7 +81,6 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
     const run = get().activeRun
     if (!run) return
 
-    // Apply all materials gained to inventory
     if (Object.keys(run.materialsGained).length > 0) {
       get().addMaterials(run.materialsGained)
     }
@@ -90,7 +91,7 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
     }))
   },
 
-  clickNode(nodeId) {
+  clickNode(nodeId, clickDamage, armor) {
     const run = get().activeRun
     if (!run) return { hpLost: 0, materialsGained: {}, killed: false }
 
@@ -106,11 +107,10 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
       const enemyDef = getEnemyById(node.entityId)
       if (!enemyDef) return { hpLost: 0, materialsGained: {}, killed: false }
 
-      hpLost = enemyDef.hpCostToClick
-      const newHp = node.hp - 1
+      hpLost = Math.max(0, enemyDef.hpCostToClick - armor)
+      const newHp = node.hp - clickDamage
 
       if (newHp <= 0) {
-        // Enemy killed — roll drops
         materialsGained = rollDropTable(enemyDef.dropTable)
         killed = true
         set(state => {
@@ -118,7 +118,7 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
           return {
             activeRun: {
               ...state.activeRun,
-              hp: clamp(state.activeRun.hp - hpLost, 0, balance.dungeon.baseHp),
+              hp: clamp(state.activeRun.hp - hpLost, 0, state.activeRun.maxHp),
               stability: clamp(
                 state.activeRun.stability + balance.dungeon.stabilityGainOnKill,
                 0,
@@ -137,7 +137,7 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
           return {
             activeRun: {
               ...state.activeRun,
-              hp: clamp(state.activeRun.hp - hpLost, 0, balance.dungeon.baseHp),
+              hp: clamp(state.activeRun.hp - hpLost, 0, state.activeRun.maxHp),
               nodes: state.activeRun.nodes.map(n =>
                 n.id === nodeId ? { ...n, hp: newHp } : n
               ),
@@ -146,7 +146,6 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
         })
       }
     } else {
-      // Resource node
       const resourceDef = getResourceById(node.entityId)
       if (!resourceDef) return { hpLost: 0, materialsGained: {}, killed: false }
 
@@ -168,11 +167,39 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
     }
 
     // End run if HP reaches 0
-    if (get().activeRun && (get().activeRun!.hp - hpLost) <= 0) {
+    if (get().activeRun && get().activeRun!.hp <= 0) {
       get().endRun()
     }
 
     return { hpLost, materialsGained, killed }
+  },
+
+  destroyNode(nodeId) {
+    const run = get().activeRun
+    if (!run) return
+    const node = run.nodes.find(n => n.id === nodeId)
+    if (!node || node.depleted) return
+
+    set(state => {
+      if (!state.activeRun) return state
+      const resourceDef = node.type === 'resource' ? getResourceById(node.entityId) : null
+      return {
+        activeRun: {
+          ...state.activeRun,
+          nodes: state.activeRun.nodes.map(n =>
+            n.id === nodeId
+              ? {
+                  ...n,
+                  depleted: true,
+                  respawnAt: resourceDef
+                    ? Date.now() + resourceDef.respawnSeconds * 1000
+                    : null,
+                }
+              : n
+          ),
+        },
+      }
+    })
   },
 
   tickDungeon(delta) {
@@ -180,6 +207,8 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
     if (!run) return
 
     const balance = getBalance()
+    const dungeon = getDungeonById(run.dungeonId)
+    const depthData = dungeon?.depths[Math.min(run.depth - 1, (dungeon?.depths.length ?? 1) - 1)]
     const now = Date.now()
 
     set(state => {
@@ -188,7 +217,7 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
       const newTorch = state.activeRun.torchTimeRemaining - delta
 
       // Respawn depleted resource nodes
-      const nodes = state.activeRun.nodes.map(n => {
+      let nodes = state.activeRun.nodes.map(n => {
         if (n.depleted && n.type === 'resource' && n.respawnAt !== null && now >= n.respawnAt) {
           return { ...n, depleted: false, respawnAt: null, hp: 1 }
         }
@@ -208,12 +237,41 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
         balance.dungeon.maxStability
       )
 
+      // Continuous enemy spawning
+      let nextEnemySpawnAt = state.activeRun.nextEnemySpawnAt
+      if (depthData && nextEnemySpawnAt && now >= nextEnemySpawnAt) {
+        const maxEnemies = depthData.maxEnemies ?? 4
+        const intervalSec = depthData.enemySpawnIntervalSeconds ?? 15
+        const liveCount = nodes.filter(n => n.type === 'enemy' && !n.depleted).length
+
+        if (liveCount < maxEnemies) {
+          // Pick a random enemy spawnGroup from this depth
+          const enemyGroups = depthData.spawnGroups.filter(g => g.type === 'enemy')
+          if (enemyGroups.length > 0) {
+            const group = enemyGroups[Math.floor(Math.random() * enemyGroups.length)]
+            const newNode: ActiveNode = {
+              id: `node_spawn_${now}_${Math.random().toString(36).slice(2)}`,
+              entityId: group.entityId,
+              type: 'enemy',
+              x: 0.05 + Math.random() * 0.9,
+              y: 0.15 + Math.random() * 0.6,
+              hp: getEnemyById(group.entityId)?.hp ?? 1,
+              depleted: false,
+              respawnAt: null,
+            }
+            nodes = [...nodes, newNode]
+          }
+        }
+        nextEnemySpawnAt = now + intervalSec * 1000
+      }
+
       return {
         activeRun: {
           ...state.activeRun,
           torchTimeRemaining: Math.max(0, newTorch),
           stability: newStability,
           nodes,
+          nextEnemySpawnAt,
         },
       }
     })

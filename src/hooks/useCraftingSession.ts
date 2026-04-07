@@ -78,7 +78,7 @@ export function useCraftingSession() {
     if (success) {
       spendMaterials(cost)
       addPotion(recipe.outputId, recipe.outputQuantity)
-      saveApprenticePattern(recipe.recipeId, pourValue)
+      saveApprenticePattern(recipe.id, pourValue)
       return 'success'
     }
 

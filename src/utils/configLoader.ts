@@ -10,6 +10,7 @@ import type {
   RecipeConfig,
   PotionConfig,
 } from '@/types/config'
+import type { AttributeDef } from '@/types/attributes'
 
 import balanceRaw from '@/data/balance.json'
 import dungeonsRaw from '@/data/dungeons.json'
@@ -18,6 +19,7 @@ import resourcesRaw from '@/data/resources.json'
 import upgradesRaw from '@/data/upgrades.json'
 import recipesRaw from '@/data/recipes.json'
 import potionsRaw from '@/data/potions.json'
+import attributesRaw from '@/data/attributes.json'
 
 export const getBalance = (): BalanceConfig => balanceRaw as BalanceConfig
 export const getDungeons = (): DungeonConfig[] => dungeonsRaw as DungeonConfig[]
@@ -26,6 +28,7 @@ export const getResources = (): ResourceConfig[] => resourcesRaw as ResourceConf
 export const getUpgrades = (): UpgradeConfig[] => upgradesRaw as UpgradeConfig[]
 export const getRecipes = (): RecipeConfig[] => recipesRaw as RecipeConfig[]
 export const getPotions = (): PotionConfig[] => potionsRaw as PotionConfig[]
+export const getAttributes = (): AttributeDef[] => attributesRaw as AttributeDef[]
 
 // Lookup helpers
 

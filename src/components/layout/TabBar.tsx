@@ -10,9 +10,10 @@ interface TabBarProps {
 }
 
 const TAB_CONFIG = [
-  { id: TABS.DUNGEON,  label: 'Dungeon',  icon: '⛏' },
-  { id: TABS.CRAFTING, label: 'Alchemy',  icon: '⚗' },
-  { id: TABS.SHOP,     label: 'Shop',     icon: '🏪' },
+  { id: TABS.DUNGEON,     label: 'Dungeon',  icon: '⛏' },
+  { id: TABS.CRAFTING,    label: 'Alchemy',  icon: '⚗' },
+  { id: TABS.SHOP,        label: 'Shop',     icon: '🏪' },
+  { id: TABS.ATTRIBUTES,  label: 'Attrs',    icon: '📊' },
 ] as const
 
 export function TabBar({ activeTab, onTabChange }: TabBarProps) {

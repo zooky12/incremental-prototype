@@ -3,6 +3,7 @@ import { TabBar } from './TabBar'
 import { DungeonView } from '@/components/dungeon/DungeonView'
 import { CraftingBench } from '@/components/crafting/CraftingBench'
 import { ShopView } from '@/components/shop/ShopView'
+import { AttributesTab } from '@/components/attributes/AttributesTab'
 import { ToastStack } from '@/components/shared/ToastStack'
 import { TABS } from '@/utils/constants'
 
@@ -25,6 +26,9 @@ export function GameShell() {
         </div>
         <div className={`absolute inset-0 overflow-y-auto ${activeTab === TABS.SHOP ? '' : 'hidden'}`}>
           <ShopView />
+        </div>
+        <div className={`absolute inset-0 overflow-y-auto ${activeTab === TABS.ATTRIBUTES ? '' : 'hidden'}`}>
+          <AttributesTab />
         </div>
       </div>
 

@@ -30,6 +30,8 @@ export interface DungeonRun {
   nodes: ActiveNode[]
   torchTimeRemaining: number
   hp: number
+  maxHp: number             // resolved from attribute system at run start
   stability: number
   materialsGained: Record<string, number>
+  nextEnemySpawnAt: number  // Date.now() timestamp for next enemy spawn
 }

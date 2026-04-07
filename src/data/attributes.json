@@ -1,0 +1,42 @@
+[
+  {
+    "id": "player.maxHp",
+    "displayName": "Max HP",
+    "category": "combat",
+    "baseValue": 10,
+    "type": "integer",
+    "description": "Maximum health points in a dungeon run"
+  },
+  {
+    "id": "player.clickDamage",
+    "displayName": "Click Damage",
+    "category": "combat",
+    "baseValue": 1,
+    "type": "integer",
+    "description": "Enemy HP removed per click"
+  },
+  {
+    "id": "player.armor",
+    "displayName": "Armor",
+    "category": "combat",
+    "baseValue": 0,
+    "type": "number",
+    "description": "Flat reduction to HP cost per enemy click"
+  },
+  {
+    "id": "player.clickRadius",
+    "displayName": "Click Radius",
+    "category": "combat",
+    "baseValue": 40,
+    "type": "integer",
+    "description": "Pixel radius around click that also hits nearby nodes"
+  },
+  {
+    "id": "player.torchDuration",
+    "displayName": "Torch Duration",
+    "category": "dungeon",
+    "baseValue": 10,
+    "type": "number",
+    "description": "Seconds before torch expires"
+  }
+]

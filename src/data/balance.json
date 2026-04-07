@@ -1,7 +1,7 @@
 {
   "dungeon": {
-    "torchDurationSeconds": 60,
-    "baseHp": 100,
+    "torchDurationSeconds": 10,
+    "baseHp": 10,
     "stabilityDrainManual": 0.4,
     "stabilityDrainAuto": 1.5,
     "stabilityRestorePurge": 2.5,

@@ -2,15 +2,15 @@ import type { GameState } from '@/types/game'
 import type { PersistOptions } from 'zustand/middleware'
 
 // Fields excluded from persistence — these reset on page load
-type PersistedState = Omit<GameState, 'activeRun' | 'session'>
+type PersistedState = Omit<GameState, 'activeRun' | 'session' | 'runBuffs'>
 
 export const persistConfig: PersistOptions<GameState, PersistedState> = {
   name: 'alchemy-empire-save',
-  version: 1,
+  version: 2,
 
   partialize: (state) => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { activeRun, session, ...persisted } = state
+    const { activeRun, session, runBuffs, ...persisted } = state
     return persisted as PersistedState
   },
 

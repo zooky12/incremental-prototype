@@ -1,15 +1,13 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js'
-import type { PixiBridge } from '@/pixi/bridge/PixiBridge'
 import type { ActiveNode } from '@/types/dungeon'
 import type { EnemyConfig } from '@/types/config'
 
 // Visual representation of an enemy node in the dungeon canvas.
-// Emits 'node-clicked' on the bridge when tapped/clicked.
-// Wanders based on its movement config.
+// Clicks are handled by DungeonScene's click layer — no bridge import needed here.
 export class EnemyNode extends Container {
   private bg: Graphics
   private hpBar: Graphics
-  private label: Text
+  private nameLabel: Text
   private glowRing: Graphics
 
   nodeId: string
@@ -17,87 +15,57 @@ export class EnemyNode extends Container {
   private maxHp: number
   private config: EnemyConfig
 
-  // Wander state
   private wanderTargetX = 0
   private wanderTargetY = 0
   private wanderTimer = 0
-  private baseX = 0
-  private baseY = 0
 
-  constructor(
-    node: ActiveNode,
-    config: EnemyConfig,
-    bridge: PixiBridge,
-    canvasW: number,
-    canvasH: number
-  ) {
+  private flashTimer = 0
+
+  constructor(node: ActiveNode, config: EnemyConfig, canvasW: number, canvasH: number) {
     super()
     this.nodeId = node.id
     this.config = config
     this.currentHp = node.hp
     this.maxHp = config.hp
-    this.baseX = node.x * canvasW
-    this.baseY = node.y * canvasH
-    this.x = this.baseX
-    this.y = this.baseY
-    this.wanderTargetX = this.baseX
-    this.wanderTargetY = this.baseY
+    this.x = node.x * canvasW
+    this.y = node.y * canvasH
+    this.wanderTargetX = this.x
+    this.wanderTargetY = this.y
 
-    // Glow ring
     this.glowRing = new Graphics()
     this.addChild(this.glowRing)
 
-    // Main body
     this.bg = new Graphics()
     this.drawBody()
     this.addChild(this.bg)
 
-    // HP bar
     this.hpBar = new Graphics()
     this.addChild(this.hpBar)
     this.drawHpBar()
 
-    // Label
     const style = new TextStyle({ fill: 0xef4444, fontSize: 9, fontWeight: 'bold' })
-    this.label = new Text({ text: config.displayName.substring(0, 8), style })
-    this.label.anchor.set(0.5)
-    this.label.y = 36
-    this.addChild(this.label)
-
-    // Interactivity
-    this.eventMode = 'static'
-    this.cursor = 'crosshair'
-
-    this.on('pointerdown', () => {
-      bridge.emit('node-clicked', {
-        nodeId: node.id,
-        nodeType: 'enemy',
-        x: this.x,
-        y: this.y,
-      })
-      this.flashHit()
-    })
+    this.nameLabel = new Text({ text: config.displayName.substring(0, 8), style })
+    this.nameLabel.anchor.set(0.5)
+    this.nameLabel.y = 36
+    this.addChild(this.nameLabel)
   }
 
   private drawBody() {
     this.bg.clear()
     this.bg.fill(0x4a1a1a)
     this.bg.stroke({ color: 0xef4444, width: 2 })
-    this.bg.regularPoly(0, 0, 26, 4, Math.PI / 4)  // diamond shape
+    this.bg.regularPoly(0, 0, 26, 4, Math.PI / 4)
     this.bg.fill()
     this.bg.stroke()
   }
 
   private drawHpBar() {
     this.hpBar.clear()
-    const w = 40
-    const h = 5
+    const w = 40; const h = 5
     const filled = (this.currentHp / this.maxHp) * w
-
     this.hpBar.fill(0x3a0a0a)
     this.hpBar.roundRect(-w / 2, -38, w, h, 2)
     this.hpBar.fill()
-
     this.hpBar.fill(0xef4444)
     this.hpBar.roundRect(-w / 2, -38, filled, h, 2)
     this.hpBar.fill()
@@ -108,9 +76,7 @@ export class EnemyNode extends Container {
     this.drawHpBar()
   }
 
-  private flashTimer = 0
-
-  private flashHit() {
+  flashHit() {
     this.flashTimer = 0.15
   }
 
@@ -119,19 +85,19 @@ export class EnemyNode extends Container {
     if (this.flashTimer > 0) {
       this.flashTimer -= delta
       this.bg.tint = 0xffffff
+      this.bg.alpha = 0.5 + 0.5 * (this.flashTimer / 0.15)
     } else {
-      this.bg.tint = 0xffffff // reset
+      this.bg.tint = 0xffffff
+      this.bg.alpha = 1
       this.flashTimer = 0
     }
 
-    // Wander movement
+    // Wander movement — full canvas, not anchored to spawn zone
     if (this.config.movement.type === 'wander' || this.config.movement.type === 'patrol') {
       this.wanderTimer -= delta
       if (this.wanderTimer <= 0) {
-        const r = (this.config.movement.wanderRadius ?? 0.12) * Math.min(canvasW, canvasH)
-        const angle = Math.random() * Math.PI * 2
-        this.wanderTargetX = clamp(this.baseX + Math.cos(angle) * r, 30, canvasW - 30)
-        this.wanderTargetY = clamp(this.baseY + Math.sin(angle) * r, 30, canvasH - 80)
+        this.wanderTargetX = 30 + Math.random() * (canvasW - 60)
+        this.wanderTargetY = 30 + Math.random() * (canvasH - 110)
         this.wanderTimer = 1.5 + Math.random() * 2
       }
 
@@ -155,10 +121,5 @@ export class EnemyNode extends Container {
 
   setKilled() {
     this.visible = false
-    this.eventMode = 'none'
   }
-}
-
-function clamp(v: number, min: number, max: number) {
-  return Math.max(min, Math.min(max, v))
 }

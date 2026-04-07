@@ -11,6 +11,7 @@ export const TABS = {
   DUNGEON: 'dungeon',
   CRAFTING: 'crafting',
   SHOP: 'shop',
+  ATTRIBUTES: 'attributes',
 } as const
 
 export const BRIDGE_EVENTS = {

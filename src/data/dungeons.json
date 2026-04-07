@@ -8,6 +8,8 @@
     "depths": [
       {
         "level": 1,
+        "maxEnemies": 3,
+        "enemySpawnIntervalSeconds": 12,
         "spawnGroups": [
           { "entityId": "herb_cluster",   "type": "resource", "count": 3, "spawnZone": "center" },
           { "entityId": "mushroom_patch", "type": "resource", "count": 2, "spawnZone": "left"   },
@@ -16,6 +18,8 @@
       },
       {
         "level": 2,
+        "maxEnemies": 4,
+        "enemySpawnIntervalSeconds": 10,
         "spawnGroups": [
           { "entityId": "herb_cluster",   "type": "resource", "count": 3, "spawnZone": "center" },
           { "entityId": "mushroom_patch", "type": "resource", "count": 2, "spawnZone": "left"   },
@@ -26,6 +30,8 @@
       },
       {
         "level": 3,
+        "maxEnemies": 5,
+        "enemySpawnIntervalSeconds": 8,
         "spawnGroups": [
           { "entityId": "herb_cluster",   "type": "resource", "count": 2, "spawnZone": "center" },
           { "entityId": "crystal_vein",   "type": "resource", "count": 2, "spawnZone": "left"   },

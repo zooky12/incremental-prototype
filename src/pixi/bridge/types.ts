@@ -1,12 +1,15 @@
 import type { NodeType } from '@/types/dungeon'
 
 // Events emitted FROM PixiJS → consumed by React hooks
-export interface PixiToReactEvents {
+export type PixiToReactEvents = {
   'node-clicked': {
     nodeId: string
     nodeType: NodeType
     x: number
     y: number
+  }
+  'node-destroyed': {
+    nodeId: string
   }
   'run-end': undefined
 }

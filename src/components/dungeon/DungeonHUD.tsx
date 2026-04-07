@@ -8,7 +8,7 @@ export function DungeonHUD() {
 
   if (!run) return null
 
-  const hpPct = run.hp / balance.dungeon.baseHp
+  const hpPct = run.hp / run.maxHp
   const torchPct = run.torchTimeRemaining / balance.dungeon.torchDurationSeconds
   const stabilityPct = run.stability / balance.dungeon.maxStability
 
@@ -19,7 +19,7 @@ export function DungeonHUD() {
         <div className="flex-1 bg-surface/80 backdrop-blur rounded p-2">
           <ProgressBar
             value={hpPct}
-            label={`HP ${Math.ceil(run.hp)}/${balance.dungeon.baseHp}`}
+            label={`HP ${Math.ceil(run.hp)}/${run.maxHp}`}
             color="bg-danger"
             height={10}
             glow={hpPct < 0.25}

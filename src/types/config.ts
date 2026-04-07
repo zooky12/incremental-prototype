@@ -76,6 +76,8 @@ export interface SpawnGroup {
 export interface DungeonDepth {
   level: number
   spawnGroups: SpawnGroup[]
+  maxEnemies: number
+  enemySpawnIntervalSeconds: number
 }
 
 export interface DungeonConfig {
@@ -99,7 +101,7 @@ export interface UnlockCondition {
   count?: number
 }
 
-export type UpgradeOperation = 'add' | 'multiply' | 'set'
+export type UpgradeOperation = 'add' | 'multiply' | 'set' | 'exponential'
 export type CostCurveType = 'exponential' | 'linear'
 
 export interface UpgradeEffect {

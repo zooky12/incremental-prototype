@@ -5,6 +5,7 @@ import { createResourceSlice } from './resourceSlice'
 import { createDungeonSlice } from './dungeonSlice'
 import { createCraftingSlice } from './craftingSlice'
 import { createShopSlice } from './shopSlice'
+import { createAttributeSlice } from './attributeSlice'
 import { persistConfig } from './persistConfig'
 import { getRecipes } from '@/utils/configLoader'
 
@@ -19,6 +20,7 @@ export const useGameStore = create<GameState>()(
         ...createDungeonSlice(...args),
         ...createCraftingSlice(...args),
         ...createShopSlice(...args),
+        ...createAttributeSlice(...args),
       }
 
       // Initialize discoveredRecipes from JSON on first load
@@ -47,3 +49,5 @@ export const useCores = () => useGameStore(s => s.cores)
 export const useCraftingSession = () => useGameStore(s => s.session)
 export const usePurchasedUpgrades = () => useGameStore(s => s.purchasedUpgrades)
 export const useDiscoveredRecipes = () => useGameStore(s => s.discoveredRecipes)
+export const useUnlockedZones = () => useGameStore(s => s.unlockedZones)
+export const useAttributeOverrides = () => useGameStore(s => s.attributeOverrides)
