@@ -1,0 +1,38 @@
+[
+  {
+    "id": "herb_cluster",
+    "displayName": "Herb Cluster",
+    "spriteAsset": "node_herb.png",
+    "resourceId": "raw_herb",
+    "yieldQuantity": 2,
+    "respawnSeconds": 20,
+    "movement": { "type": "static" }
+  },
+  {
+    "id": "mushroom_patch",
+    "displayName": "Mushroom Patch",
+    "spriteAsset": "node_mushroom.png",
+    "resourceId": "raw_mushroom",
+    "yieldQuantity": 1,
+    "respawnSeconds": 30,
+    "movement": { "type": "static" }
+  },
+  {
+    "id": "crystal_vein",
+    "displayName": "Crystal Vein",
+    "spriteAsset": "node_crystal.png",
+    "resourceId": "raw_crystal",
+    "yieldQuantity": 1,
+    "respawnSeconds": 45,
+    "movement": { "type": "static" }
+  },
+  {
+    "id": "glowing_moss",
+    "displayName": "Glowing Moss",
+    "spriteAsset": "node_moss.png",
+    "resourceId": "glowing_moss",
+    "yieldQuantity": 3,
+    "respawnSeconds": 15,
+    "movement": { "type": "static" }
+  }
+]

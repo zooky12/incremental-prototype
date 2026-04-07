@@ -1,0 +1,40 @@
+[
+  {
+    "id": "cave_of_roots",
+    "displayName": "Cave of Roots",
+    "backgroundAsset": "bg_cave.png",
+    "coreSlots": 2,
+    "unlockCondition": null,
+    "depths": [
+      {
+        "level": 1,
+        "spawnGroups": [
+          { "entityId": "herb_cluster",   "type": "resource", "count": 3, "spawnZone": "center" },
+          { "entityId": "mushroom_patch", "type": "resource", "count": 2, "spawnZone": "left"   },
+          { "entityId": "giant_rat",      "type": "enemy",    "count": 2, "spawnZone": "right"  }
+        ]
+      },
+      {
+        "level": 2,
+        "spawnGroups": [
+          { "entityId": "herb_cluster",   "type": "resource", "count": 3, "spawnZone": "center" },
+          { "entityId": "mushroom_patch", "type": "resource", "count": 2, "spawnZone": "left"   },
+          { "entityId": "glowing_moss",   "type": "resource", "count": 1, "spawnZone": "random" },
+          { "entityId": "giant_rat",      "type": "enemy",    "count": 2, "spawnZone": "right"  },
+          { "entityId": "cave_spider",    "type": "enemy",    "count": 1, "spawnZone": "random" }
+        ]
+      },
+      {
+        "level": 3,
+        "spawnGroups": [
+          { "entityId": "herb_cluster",   "type": "resource", "count": 2, "spawnZone": "center" },
+          { "entityId": "crystal_vein",   "type": "resource", "count": 2, "spawnZone": "left"   },
+          { "entityId": "glowing_moss",   "type": "resource", "count": 2, "spawnZone": "random" },
+          { "entityId": "giant_rat",      "type": "enemy",    "count": 2, "spawnZone": "right"  },
+          { "entityId": "cave_spider",    "type": "enemy",    "count": 2, "spawnZone": "random" },
+          { "entityId": "stone_golem",    "type": "enemy",    "count": 1, "spawnZone": "center" }
+        ]
+      }
+    ]
+  }
+]

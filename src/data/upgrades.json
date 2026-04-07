@@ -1,0 +1,122 @@
+[
+  {
+    "id": "torch_duration",
+    "displayName": "Brighter Torch",
+    "description": "Extends dungeon run duration.",
+    "category": "dungeon",
+    "maxLevel": 5,
+    "unlockCondition": null,
+    "effect": {
+      "stat": "dungeon.torchDurationSeconds",
+      "operation": "add",
+      "valuePerLevel": [10, 15, 20, 30, 45]
+    },
+    "costCurve": { "type": "exponential", "base": 50, "exponent": 2.2, "resource": "gold" }
+  },
+  {
+    "id": "max_hp",
+    "displayName": "Reinforced Constitution",
+    "description": "Increases your maximum HP per run.",
+    "category": "dungeon",
+    "maxLevel": 5,
+    "unlockCondition": null,
+    "effect": {
+      "stat": "dungeon.baseHp",
+      "operation": "add",
+      "valuePerLevel": [20, 30, 40, 60, 80]
+    },
+    "costCurve": { "type": "exponential", "base": 60, "exponent": 2.0, "resource": "gold" }
+  },
+  {
+    "id": "stability_max",
+    "displayName": "Reinforced Core",
+    "description": "Increases maximum dungeon stability.",
+    "category": "dungeon",
+    "maxLevel": 4,
+    "unlockCondition": null,
+    "effect": {
+      "stat": "dungeon.maxStability",
+      "operation": "add",
+      "valuePerLevel": [15, 20, 25, 35]
+    },
+    "costCurve": { "type": "exponential", "base": 80, "exponent": 2.1, "resource": "gold" }
+  },
+  {
+    "id": "stability_drain_reduction",
+    "displayName": "Reinforced Walls",
+    "description": "Reduces manual exploration stability drain.",
+    "category": "dungeon",
+    "maxLevel": 3,
+    "unlockCondition": {
+      "type": "upgrade_level",
+      "upgradeId": "stability_max",
+      "level": 1
+    },
+    "effect": {
+      "stat": "dungeon.stabilityDrainManual",
+      "operation": "add",
+      "valuePerLevel": [-0.1, -0.15, -0.15]
+    },
+    "costCurve": { "type": "exponential", "base": 150, "exponent": 2.3, "resource": "gold" }
+  },
+  {
+    "id": "hp_cost_reduction",
+    "displayName": "Alchemist's Armour",
+    "description": "Reduces HP cost per enemy click.",
+    "category": "dungeon",
+    "maxLevel": 3,
+    "unlockCondition": {
+      "type": "upgrade_level",
+      "upgradeId": "max_hp",
+      "level": 2
+    },
+    "effect": {
+      "stat": "dungeon.hpCostPerEnemyClick",
+      "operation": "add",
+      "valuePerLevel": [-2, -2, -3]
+    },
+    "costCurve": { "type": "exponential", "base": 200, "exponent": 2.4, "resource": "gold" }
+  },
+  {
+    "id": "failure_chance_reduction",
+    "displayName": "Steady Hands",
+    "description": "Reduces base potion failure chance.",
+    "category": "crafting",
+    "maxLevel": 5,
+    "unlockCondition": null,
+    "effect": {
+      "stat": "crafting.baseFailureChance",
+      "operation": "add",
+      "valuePerLevel": [-0.02, -0.02, -0.02, -0.03, -0.03]
+    },
+    "costCurve": { "type": "exponential", "base": 75, "exponent": 2.1, "resource": "gold" }
+  },
+  {
+    "id": "pour_window",
+    "displayName": "Alchemical Patience",
+    "description": "Widens the pour timing window.",
+    "category": "crafting",
+    "maxLevel": 4,
+    "unlockCondition": null,
+    "effect": {
+      "stat": "crafting.basePourWindowSeconds",
+      "operation": "add",
+      "valuePerLevel": [0.3, 0.4, 0.5, 0.6]
+    },
+    "costCurve": { "type": "exponential", "base": 90, "exponent": 2.0, "resource": "gold" }
+  },
+  {
+    "id": "potion_potency",
+    "displayName": "Alchemical Refinement",
+    "description": "Increases gold value of all potions sold.",
+    "category": "shop",
+    "maxLevel": 4,
+    "unlockCondition": null,
+    "effect": {
+      "stat": "shop.baseSellMultiplier",
+      "operation": "multiply",
+      "valuePerLevel": [1.2, 1.4, 1.6, 2.0]
+    },
+    "costCurve": { "type": "exponential", "base": 100, "exponent": 2.5, "resource": "gold" }
+  }
+]

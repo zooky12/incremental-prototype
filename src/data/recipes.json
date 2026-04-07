@@ -1,0 +1,81 @@
+[
+  {
+    "id": "recipe_refined_herb",
+    "outputId": "refined_herb",
+    "outputQuantity": 1,
+    "ingredients": [
+      { "itemId": "raw_herb", "quantity": 2 }
+    ],
+    "pourWindow": null,
+    "canAutomate": true,
+    "discoveredByDefault": true
+  },
+  {
+    "id": "recipe_refined_mushroom",
+    "outputId": "refined_mushroom",
+    "outputQuantity": 1,
+    "ingredients": [
+      { "itemId": "raw_mushroom", "quantity": 2 }
+    ],
+    "pourWindow": null,
+    "canAutomate": true,
+    "discoveredByDefault": true
+  },
+  {
+    "id": "recipe_healing_reagent",
+    "outputId": "healing_reagent",
+    "outputQuantity": 1,
+    "ingredients": [
+      { "itemId": "refined_herb", "quantity": 1 }
+    ],
+    "pourWindow": { "start": 0.35, "end": 0.65 },
+    "canAutomate": false,
+    "discoveredByDefault": true
+  },
+  {
+    "id": "recipe_stamina_reagent",
+    "outputId": "stamina_reagent",
+    "outputQuantity": 1,
+    "ingredients": [
+      { "itemId": "refined_mushroom", "quantity": 1 },
+      { "itemId": "glowing_moss", "quantity": 1 }
+    ],
+    "pourWindow": { "start": 0.4, "end": 0.6 },
+    "canAutomate": false,
+    "discoveredByDefault": false
+  },
+  {
+    "id": "recipe_healing_potion",
+    "outputId": "healing_potion",
+    "outputQuantity": 1,
+    "ingredients": [
+      { "itemId": "healing_reagent", "quantity": 1 }
+    ],
+    "pourWindow": { "start": 0.42, "end": 0.58 },
+    "canAutomate": false,
+    "discoveredByDefault": true
+  },
+  {
+    "id": "recipe_stamina_potion",
+    "outputId": "stamina_potion",
+    "outputQuantity": 1,
+    "ingredients": [
+      { "itemId": "stamina_reagent", "quantity": 1 }
+    ],
+    "pourWindow": { "start": 0.38, "end": 0.62 },
+    "canAutomate": false,
+    "discoveredByDefault": false
+  },
+  {
+    "id": "recipe_greater_healing_potion",
+    "outputId": "greater_healing_potion",
+    "outputQuantity": 1,
+    "ingredients": [
+      { "itemId": "healing_reagent", "quantity": 2 },
+      { "itemId": "refined_herb", "quantity": 1 }
+    ],
+    "pourWindow": { "start": 0.45, "end": 0.55 },
+    "canAutomate": false,
+    "discoveredByDefault": false
+  }
+]

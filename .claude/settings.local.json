@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm create:*)",
+      "Bash(npm --version)",
+      "Bash(npm install:*)",
+      "Bash(pnpm --version)",
+      "Bash(npx pnpm:*)",
+      "Bash(npm create:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm approve-builds:*)",
+      "Bash(echo {\"\"onlyBuiltDependencies\"\":[\"\"esbuild\"\"]})",
+      "Bash(pnpm typecheck:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(timeout 10 pnpm exec vite build)",
+      "Bash(curl -s http://localhost:5174/src/main.tsx)"
+    ]
+  }
+}

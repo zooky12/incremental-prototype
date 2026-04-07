@@ -1,0 +1,36 @@
+[
+  {
+    "id": "healing_potion",
+    "displayName": "Healing Potion",
+    "tier": 1,
+    "baseGoldValue": 20,
+    "spriteAsset": "potion_red.png",
+    "description": "Restores 30 HP during a dungeon run.",
+    "dungeonEffect": { "type": "heal", "value": 30 },
+    "shopUnlockCondition": null
+  },
+  {
+    "id": "stamina_potion",
+    "displayName": "Stamina Potion",
+    "tier": 1,
+    "baseGoldValue": 25,
+    "spriteAsset": "potion_green.png",
+    "description": "Extends torch duration by 15 seconds.",
+    "dungeonEffect": { "type": "torch_extend", "value": 15 },
+    "shopUnlockCondition": null
+  },
+  {
+    "id": "greater_healing_potion",
+    "displayName": "Greater Healing Potion",
+    "tier": 2,
+    "baseGoldValue": 75,
+    "spriteAsset": "potion_red_large.png",
+    "description": "Restores 80 HP and slightly boosts yield.",
+    "dungeonEffect": { "type": "heal", "value": 80 },
+    "shopUnlockCondition": {
+      "type": "upgrade_purchased",
+      "upgradeId": "potion_potency",
+      "level": 1
+    }
+  }
+]

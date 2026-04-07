@@ -1,0 +1,53 @@
+[
+  {
+    "id": "giant_rat",
+    "displayName": "Giant Rat",
+    "spriteAsset": "enemy_rat.png",
+    "hp": 2,
+    "hpCostToClick": 8,
+    "stabilityDrainPerSecond": 2.0,
+    "movement": {
+      "type": "wander",
+      "speed": 60,
+      "wanderRadius": 0.12
+    },
+    "dropTable": [
+      { "resourceId": "rat_tail", "chance": 0.5, "quantity": 1 },
+      { "resourceId": "raw_bone", "chance": 0.25, "quantity": 1 }
+    ]
+  },
+  {
+    "id": "cave_spider",
+    "displayName": "Cave Spider",
+    "spriteAsset": "enemy_spider.png",
+    "hp": 1,
+    "hpCostToClick": 5,
+    "stabilityDrainPerSecond": 1.5,
+    "movement": {
+      "type": "patrol",
+      "speed": 90,
+      "wanderRadius": 0.2
+    },
+    "dropTable": [
+      { "resourceId": "spider_silk", "chance": 0.6, "quantity": 1 },
+      { "resourceId": "venom_gland", "chance": 0.2, "quantity": 1 }
+    ]
+  },
+  {
+    "id": "stone_golem",
+    "displayName": "Stone Golem",
+    "spriteAsset": "enemy_golem.png",
+    "hp": 5,
+    "hpCostToClick": 15,
+    "stabilityDrainPerSecond": 4.0,
+    "movement": {
+      "type": "wander",
+      "speed": 30,
+      "wanderRadius": 0.08
+    },
+    "dropTable": [
+      { "resourceId": "rough_stone", "chance": 0.8, "quantity": 2 },
+      { "resourceId": "golem_core_shard", "chance": 0.1, "quantity": 1 }
+    ]
+  }
+]
