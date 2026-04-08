@@ -38,32 +38,20 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
 
     const depthData = dungeon.depths[Math.min(depth - 1, dungeon.depths.length - 1)]
 
-    const nodes: ActiveNode[] = []
-    let nodeIndex = 0
-    for (const group of depthData.spawnGroups) {
-      for (let i = 0; i < group.count; i++) {
-        const entityDef =
-          group.type === 'enemy'
-            ? getEnemyById(group.entityId)
-            : getResourceById(group.entityId)
-
-        if (!entityDef) continue
-
-        const x = spawnZoneToX(group.spawnZone, nodeIndex)
-        const y = 0.3 + Math.random() * 0.4
-
-        nodes.push({
-          id: `node_${nodeIndex++}`,
-          entityId: group.entityId,
-          type: group.type,
-          x,
-          y,
-          hp: group.type === 'enemy' ? (getEnemyById(group.entityId)?.hp ?? 1) : 1,
-          depleted: false,
-          respawnAt: null,
-        })
-      }
-    }
+    // Initialise per-entity spawn timers, staggered evenly across the first spawn interval
+    // so entities don't all burst at once on entry
+    const spawnTimers: Record<string, number> = {}
+    const totalGroups = depthData.spawnGroups.length
+    depthData.spawnGroups.forEach((group, i) => {
+      const entity = group.type === 'enemy'
+        ? getEnemyById(group.entityId)
+        : getResourceById(group.entityId)
+      if (!entity) return
+      const intervalMs = (entity.spawnIntervalSeconds / dungeon.spawnRateMultiplier) * 1000
+      // Stagger: spread across the first interval, minimum 1 s delay
+      const staggerMs = 1000 + (i / totalGroups) * intervalMs
+      spawnTimers[group.entityId] = Date.now() + staggerMs
+    })
 
     set({
       activeRun: {
@@ -71,12 +59,12 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
         coreId: core.id,
         depth,
         startedAt: Date.now(),
-        nodes,
+        nodes: [],          // starts empty — nodes spawn over time
         torchTimeRemaining: torchDuration,
         hp: maxHp,
         maxHp,
         materialsGained: {},
-        nextEnemySpawnAt: Date.now() + (depthData.enemySpawnIntervalSeconds ?? 15) * 1000,
+        spawnTimers,
       },
     })
   },
@@ -92,24 +80,28 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
     const dungeon = getDungeonById(run.dungeonId)
     const energyCost = dungeon?.energyPerRun ?? 0
     const balance = getBalance()
-    const liveEnemies = run.nodes.filter(n => n.type === 'enemy' && !n.depleted).length
-    const stabilityDelta = liveEnemies > 0
-      ? -balance.dungeon.stabilityLossPerRun
-      :  balance.dungeon.stabilityGainPerRun
 
-    set(state => ({
-      activeRun: null,
-      totalRunsCompleted: state.totalRunsCompleted + 1,
-      cores: state.cores.map(c =>
-        c.id === run.coreId
-          ? {
-              ...c,
-              stability: clamp(c.stability + stabilityDelta, 0, 100),
-              energy:    clamp(c.energy - energyCost, 0, dungeon?.maxEnergy ?? 100),
-            }
-          : c
-      ),
-    }))
+    // Stability loss only when exiting with live enemies — no gain for clean exits;
+    // stability is now recovered by killing enemies
+    const liveEnemies = run.nodes.filter(n => n.type === 'enemy' && !n.depleted).length
+    const stabilityDelta = liveEnemies > 0 ? -balance.dungeon.stabilityLossPerRun : 0
+
+    set(state => {
+      const updatedCores = state.cores.map(c => {
+        if (c.id !== run.coreId) return c
+        const maxEnergy = dungeon?.maxEnergy ?? 100
+        const newStability = clamp(c.stability + stabilityDelta, 0, 100)
+        const newEnergy = clamp(c.energy - energyCost, 0, maxEnergy)
+        // If stability just hit 0, zero out energy too
+        const finalEnergy = newStability <= 0 ? 0 : newEnergy
+        return { ...c, stability: newStability, energy: finalEnergy }
+      })
+      return {
+        activeRun: null,
+        totalRunsCompleted: state.totalRunsCompleted + 1,
+        cores: updatedCores,
+      }
+    })
   },
 
   clickNode(nodeId, clickDamage, armor) {
@@ -138,8 +130,13 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
         const enemyMult = 1 + balance.dungeon.enemyStabilityEffect * (1 - stabilityRatio)
         materialsGained = rollDropTable(enemyDef.dropTable, enemyMult)
         killed = true
+
+        // Restore stability to the core when an enemy is killed
+        const stabilityRecover = enemyDef.stabilityRecoverOnKill
         set(state => {
           if (!state.activeRun) return state
+          const dungeon = getDungeonById(run.dungeonId)
+          const maxEnergy = dungeon?.maxEnergy ?? 100
           return {
             activeRun: {
               ...state.activeRun,
@@ -149,6 +146,11 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
               ),
               materialsGained: mergeMaterials(state.activeRun.materialsGained, materialsGained),
             },
+            cores: state.cores.map(c =>
+              c.id === run.coreId
+                ? { ...c, stability: clamp(c.stability + stabilityRecover, 0, 100), energy: Math.min(c.energy, maxEnergy) }
+                : c
+            ),
           }
         })
       } else {
@@ -227,35 +229,134 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
 
   tickDungeon(delta) {
     const balance = getBalance()
+    const now = Date.now()
 
-    // Recharge cores in the recharge zone — runs regardless of active run
+    // ── Process all cores by zone ──────────────────────────────────────────────
+    const autoMaterials: Record<string, number> = {}
+
     set(state => {
-      let changed = false
+      let coresChanged = false
       const cores = state.cores.map(c => {
-        if (c.zone !== 'recharge') return c
         const dungeon = getDungeonById(c.dungeonId)
-        const max = dungeon?.maxEnergy ?? 100
-        if (c.energy >= max) return c
-        const newEnergy = Math.min(c.energy + balance.dungeon.energyRechargeRate * delta, max)
-        changed = true
-        return { ...c, energy: newEnergy }
+        if (!dungeon) return c
+        const maxEnergy = dungeon.maxEnergy
+
+        if (c.zone === 'recharge') {
+          if (c.energy >= maxEnergy) return c
+
+          const isBroken = c.stability <= 0
+          const baseRate = balance.dungeon.energyRechargeRate * dungeon.rechargeRateMultiplier
+          const rate = isBroken
+            ? baseRate / balance.dungeon.brokenRechargeSlowdown
+            : baseRate
+
+          const newEnergy = Math.min(c.energy + rate * delta, maxEnergy)
+
+          // Broken core just finished its slow charge: restore minimal stability, zero energy
+          if (isBroken && newEnergy >= maxEnergy) {
+            coresChanged = true
+            return {
+              ...c,
+              energy: 0,
+              stability: balance.dungeon.brokenRecoverStability,
+            }
+          }
+
+          if (newEnergy !== c.energy) {
+            coresChanged = true
+            return { ...c, energy: newEnergy }
+          }
+          return c
+        }
+
+        if (c.zone === 'auto') {
+          if (c.energy <= 0) return c   // exhausted — no output, no further drain
+
+          const energyDrain    = balance.dungeon.autoEnergyDrainRate    * dungeon.autoEnergyDrainMultiplier    * delta
+          const stabilityDrain = balance.dungeon.autoStabilityDrainRate * dungeon.autoStabilityDrainMultiplier * delta
+          const stabilityRatio = c.stability / 100
+
+          let newEnergy    = clamp(c.energy    - energyDrain,    0, maxEnergy)
+          let newStability = clamp(c.stability - stabilityDrain, 0, 100)
+
+          // Stability hitting 0 kills energy too
+          if (newStability <= 0) newEnergy = 0
+
+          // Generate resources from the dungeon's depth spawnGroups
+          const depthData = dungeon.depths[0]   // auto always uses depth 1 for now
+          const resourceMult = 1 + balance.dungeon.resourceStabilityEffect * (1 - stabilityRatio)
+          const enemyMult    = 1 + balance.dungeon.enemyStabilityEffect    * (1 - stabilityRatio)
+
+          for (const group of depthData.spawnGroups) {
+            if (group.type === 'resource') {
+              const resDef = getResourceById(group.entityId)
+              if (!resDef) continue
+              // Rate: group.count nodes, each spawns every spawnIntervalSeconds, yields yieldQuantity
+              const ratePerSec = (group.count * resDef.yieldQuantity) / resDef.spawnIntervalSeconds * dungeon.spawnRateMultiplier
+              const expected = ratePerSec * resourceMult * delta
+              const amount = Math.floor(expected) + (Math.random() < (expected % 1) ? 1 : 0)
+              if (amount > 0) {
+                autoMaterials[resDef.resourceId] = (autoMaterials[resDef.resourceId] ?? 0) + amount
+              }
+            } else {
+              const enemyDef = getEnemyById(group.entityId)
+              if (!enemyDef) continue
+              const killRatePerSec = group.count / enemyDef.spawnIntervalSeconds * dungeon.spawnRateMultiplier
+              for (const entry of enemyDef.dropTable) {
+                const ratePerSec = killRatePerSec * entry.chance * entry.quantity * enemyMult
+                const expected = ratePerSec * delta
+                const amount = Math.floor(expected) + (Math.random() < (expected % 1) ? 1 : 0)
+                if (amount > 0) {
+                  autoMaterials[entry.resourceId] = (autoMaterials[entry.resourceId] ?? 0) + amount
+                }
+              }
+            }
+          }
+
+          coresChanged = true
+          return { ...c, energy: newEnergy, stability: newStability }
+        }
+
+        if (c.zone === 'purge') {
+          if (c.energy <= 0) return c   // no energy → purge stops
+
+          const energyDrain   = balance.dungeon.purgeEnergyDrainRate    * dungeon.purgeEnergyDrainMultiplier    * delta
+          const stabilityGain = balance.dungeon.purgeStabilityGainRate  * dungeon.purgeStabilityGainMultiplier  * delta
+
+          const newEnergy    = clamp(c.energy    - energyDrain,    0, maxEnergy)
+          const newStability = clamp(c.stability + stabilityGain,  0, 100)
+
+          if (newEnergy !== c.energy || newStability !== c.stability) {
+            coresChanged = true
+            return { ...c, energy: newEnergy, stability: newStability }
+          }
+          return c
+        }
+
+        return c
       })
-      return changed ? { cores } : state
+
+      return coresChanged ? { cores } : state
     })
 
+    // Flush auto-zone material gains into the player inventory
+    if (Object.keys(autoMaterials).length > 0) {
+      get().addMaterials(autoMaterials)
+    }
+
+    // ── Active run tick ────────────────────────────────────────────────────────
     const run = get().activeRun
     if (!run) return
 
     const dungeon = getDungeonById(run.dungeonId)
     const depthData = dungeon?.depths[Math.min(run.depth - 1, (dungeon?.depths.length ?? 1) - 1)]
-    const now = Date.now()
 
     set(state => {
       if (!state.activeRun) return state
 
       const newTorch = state.activeRun.torchTimeRemaining - delta
 
-      // Respawn depleted resource nodes
+      // Revive depleted resource nodes after their respawn timer
       let nodes = state.activeRun.nodes.map(n => {
         if (n.depleted && n.type === 'resource' && n.respawnAt !== null && now >= n.respawnAt) {
           return { ...n, depleted: false, respawnAt: null, hp: 1 }
@@ -263,31 +364,41 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
         return n
       })
 
-      // Continuous enemy spawning
-      let nextEnemySpawnAt = state.activeRun.nextEnemySpawnAt
-      if (depthData && nextEnemySpawnAt && now >= nextEnemySpawnAt) {
-        const maxEnemies = depthData.maxEnemies ?? 4
-        const intervalSec = depthData.enemySpawnIntervalSeconds ?? 15
-        const liveCount = nodes.filter(n => n.type === 'enemy' && !n.depleted).length
+      // Per-entity spawn timers — spawn a new node when its timer fires
+      const spawnTimers = { ...state.activeRun.spawnTimers }
 
-        if (liveCount < maxEnemies) {
-          const enemyGroups = depthData.spawnGroups.filter(g => g.type === 'enemy')
-          if (enemyGroups.length > 0) {
-            const group = enemyGroups[Math.floor(Math.random() * enemyGroups.length)]
-            const newNode: ActiveNode = {
-              id: `node_spawn_${now}_${Math.random().toString(36).slice(2)}`,
-              entityId: group.entityId,
-              type: 'enemy',
-              x: 0.05 + Math.random() * 0.9,
-              y: 0.15 + Math.random() * 0.6,
-              hp: getEnemyById(group.entityId)?.hp ?? 1,
-              depleted: false,
-              respawnAt: null,
-            }
-            nodes = [...nodes, newNode]
+      if (depthData && dungeon) {
+        for (const group of depthData.spawnGroups) {
+          const entity = group.type === 'enemy'
+            ? getEnemyById(group.entityId)
+            : getResourceById(group.entityId)
+          if (!entity) continue
+
+          const maxCount = group.count
+          const aliveCount = nodes.filter(n => n.entityId === group.entityId && !n.depleted).length
+          if (aliveCount >= maxCount) continue
+
+          const nextSpawnAt = spawnTimers[group.entityId] ?? now
+          if (now < nextSpawnAt) continue
+
+          // Spawn one node of this entity type
+          const x = spawnZoneToX(group.spawnZone, nodes.length)
+          const y = 0.15 + Math.random() * 0.65
+          const newNode: ActiveNode = {
+            id: `node_spawn_${now}_${group.entityId}_${Math.random().toString(36).slice(2, 7)}`,
+            entityId: group.entityId,
+            type: group.type,
+            x,
+            y,
+            hp: group.type === 'enemy' ? (getEnemyById(group.entityId)?.hp ?? 1) : 1,
+            depleted: false,
+            respawnAt: null,
           }
+          nodes = [...nodes, newNode]
+
+          const intervalMs = (entity.spawnIntervalSeconds / dungeon.spawnRateMultiplier) * 1000
+          spawnTimers[group.entityId] = now + intervalMs
         }
-        nextEnemySpawnAt = now + intervalSec * 1000
       }
 
       return {
@@ -295,7 +406,7 @@ export const createDungeonSlice: StateCreator<GameState, [], [], DungeonSlice> =
           ...state.activeRun,
           torchTimeRemaining: Math.max(0, newTorch),
           nodes,
-          nextEnemySpawnAt,
+          spawnTimers,
         },
       }
     })

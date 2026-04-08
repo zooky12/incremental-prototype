@@ -5,6 +5,8 @@
     "spriteAsset": "enemy_rat.png",
     "hp": 2,
     "hpCostToClick": 4,
+    "spawnIntervalSeconds": 6,
+    "stabilityRecoverOnKill": 3,
     "movement": {
       "type": "wander",
       "speed": 60,
@@ -12,8 +14,16 @@
       "idleTime": 1.5
     },
     "dropTable": [
-      { "resourceId": "rat_tail", "chance": 0.5, "quantity": 1 },
-      { "resourceId": "raw_bone", "chance": 0.25, "quantity": 1 }
+      {
+        "resourceId": "rat_tail",
+        "chance": 0.5,
+        "quantity": 1
+      },
+      {
+        "resourceId": "raw_bone",
+        "chance": 0.25,
+        "quantity": 1
+      }
     ]
   },
   {
@@ -22,6 +32,8 @@
     "spriteAsset": "enemy_spider.png",
     "hp": 1,
     "hpCostToClick": 5,
+    "spawnIntervalSeconds": 8,
+    "stabilityRecoverOnKill": 5,
     "movement": {
       "type": "patrol",
       "speed": 90,
@@ -29,8 +41,16 @@
       "patrolTurnRate": 1.8
     },
     "dropTable": [
-      { "resourceId": "spider_silk", "chance": 0.6, "quantity": 1 },
-      { "resourceId": "venom_gland", "chance": 0.2, "quantity": 1 }
+      {
+        "resourceId": "spider_silk",
+        "chance": 0.6,
+        "quantity": 1
+      },
+      {
+        "resourceId": "venom_gland",
+        "chance": 0.2,
+        "quantity": 1
+      }
     ]
   },
   {
@@ -39,6 +59,8 @@
     "spriteAsset": "enemy_golem.png",
     "hp": 5,
     "hpCostToClick": 15,
+    "spawnIntervalSeconds": 20,
+    "stabilityRecoverOnKill": 12,
     "movement": {
       "type": "wander",
       "speed": 30,
@@ -46,8 +68,16 @@
       "idleTime": 3.0
     },
     "dropTable": [
-      { "resourceId": "rough_stone", "chance": 0.8, "quantity": 2 },
-      { "resourceId": "golem_core_shard", "chance": 0.1, "quantity": 1 }
+      {
+        "resourceId": "rough_stone",
+        "chance": 0.8,
+        "quantity": 2
+      },
+      {
+        "resourceId": "golem_core_shard",
+        "chance": 0.1,
+        "quantity": 1
+      }
     ]
   }
 ]

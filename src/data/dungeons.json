@@ -4,43 +4,113 @@
     "displayName": "Cave of Roots",
     "backgroundAsset": "bg_cave.png",
     "coreSlots": 2,
-    "maxEnergy": 100,
-    "energyPerRun": 40,
+    "maxEnergy": 10,
+    "energyPerRun": 10,
     "unlockCondition": null,
+    "spawnRateMultiplier": 1.0,
+    "rechargeRateMultiplier": 1.0,
+    "autoEnergyDrainMultiplier": 1.0,
+    "autoStabilityDrainMultiplier": 1.0,
+    "purgeStabilityGainMultiplier": 1.0,
+    "purgeEnergyDrainMultiplier": 1.0,
     "depths": [
       {
         "level": 1,
-        "maxEnemies": 3,
-        "enemySpawnIntervalSeconds": 12,
         "spawnGroups": [
-          { "entityId": "herb_cluster",   "type": "resource", "count": 3, "spawnZone": "center" },
-          { "entityId": "mushroom_patch", "type": "resource", "count": 2, "spawnZone": "left"   },
-          { "entityId": "giant_rat",      "type": "enemy",    "count": 2, "spawnZone": "right"  }
+          {
+            "entityId": "herb_cluster",
+            "type": "resource",
+            "count": 3,
+            "spawnZone": "center"
+          },
+          {
+            "entityId": "mushroom_patch",
+            "type": "resource",
+            "count": 2,
+            "spawnZone": "left"
+          },
+          {
+            "entityId": "giant_rat",
+            "type": "enemy",
+            "count": 2,
+            "spawnZone": "right"
+          }
         ]
       },
       {
         "level": 2,
-        "maxEnemies": 4,
-        "enemySpawnIntervalSeconds": 10,
         "spawnGroups": [
-          { "entityId": "herb_cluster",   "type": "resource", "count": 3, "spawnZone": "center" },
-          { "entityId": "mushroom_patch", "type": "resource", "count": 2, "spawnZone": "left"   },
-          { "entityId": "glowing_moss",   "type": "resource", "count": 1, "spawnZone": "random" },
-          { "entityId": "giant_rat",      "type": "enemy",    "count": 2, "spawnZone": "right"  },
-          { "entityId": "cave_spider",    "type": "enemy",    "count": 1, "spawnZone": "random" }
+          {
+            "entityId": "herb_cluster",
+            "type": "resource",
+            "count": 3,
+            "spawnZone": "center"
+          },
+          {
+            "entityId": "mushroom_patch",
+            "type": "resource",
+            "count": 2,
+            "spawnZone": "left"
+          },
+          {
+            "entityId": "glowing_moss",
+            "type": "resource",
+            "count": 1,
+            "spawnZone": "random"
+          },
+          {
+            "entityId": "giant_rat",
+            "type": "enemy",
+            "count": 2,
+            "spawnZone": "right"
+          },
+          {
+            "entityId": "cave_spider",
+            "type": "enemy",
+            "count": 1,
+            "spawnZone": "random"
+          }
         ]
       },
       {
         "level": 3,
-        "maxEnemies": 5,
-        "enemySpawnIntervalSeconds": 8,
         "spawnGroups": [
-          { "entityId": "herb_cluster",   "type": "resource", "count": 2, "spawnZone": "center" },
-          { "entityId": "crystal_vein",   "type": "resource", "count": 2, "spawnZone": "left"   },
-          { "entityId": "glowing_moss",   "type": "resource", "count": 2, "spawnZone": "random" },
-          { "entityId": "giant_rat",      "type": "enemy",    "count": 2, "spawnZone": "right"  },
-          { "entityId": "cave_spider",    "type": "enemy",    "count": 2, "spawnZone": "random" },
-          { "entityId": "stone_golem",    "type": "enemy",    "count": 1, "spawnZone": "center" }
+          {
+            "entityId": "herb_cluster",
+            "type": "resource",
+            "count": 2,
+            "spawnZone": "center"
+          },
+          {
+            "entityId": "crystal_vein",
+            "type": "resource",
+            "count": 2,
+            "spawnZone": "left"
+          },
+          {
+            "entityId": "glowing_moss",
+            "type": "resource",
+            "count": 2,
+            "spawnZone": "random"
+          },
+          {
+            "entityId": "giant_rat",
+            "type": "enemy",
+            "count": 2,
+            "spawnZone": "right"
+          },
+          {
+            "entityId": "cave_spider",
+            "type": "enemy",
+            "count": 2,
+            "spawnZone": "random"
+          },
+          {
+            "entityId": "stone_golem",
+            "type": "enemy",
+            "count": 1,
+            "spawnZone": "center"
+          }
         ]
       }
     ]

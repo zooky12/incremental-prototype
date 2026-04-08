@@ -34,5 +34,5 @@ export interface DungeonRun {
   hp: number
   maxHp: number              // resolved from attribute system at run start
   materialsGained: Record<string, number>
-  nextEnemySpawnAt: number   // Date.now() timestamp for next enemy spawn
+  spawnTimers: Record<string, number>  // entityId → Date.now() timestamp of next spawn
 }

@@ -4,9 +4,12 @@
     "displayName": "Herb Cluster",
     "spriteAsset": "node_herb.png",
     "resourceId": "raw_herb",
-    "yieldQuantity": 2,
-    "respawnSeconds": 20,
-    "movement": { "type": "static" }
+    "yieldQuantity": 1,
+    "respawnSeconds": 15,
+    "spawnIntervalSeconds": 10,
+    "movement": {
+      "type": "static"
+    }
   },
   {
     "id": "mushroom_patch",
@@ -14,8 +17,14 @@
     "spriteAsset": "node_mushroom.png",
     "resourceId": "raw_mushroom",
     "yieldQuantity": 1,
-    "respawnSeconds": 30,
-    "movement": { "type": "static" }
+    "respawnSeconds": 15,
+    "spawnIntervalSeconds": 10,
+    "movement": {
+      "type": "wander",
+      "speed": 30,
+      "wanderRadius": 0.12,
+      "idleTime": 1.5
+    }
   },
   {
     "id": "crystal_vein",
@@ -24,7 +33,10 @@
     "resourceId": "raw_crystal",
     "yieldQuantity": 1,
     "respawnSeconds": 45,
-    "movement": { "type": "static" }
+    "spawnIntervalSeconds": 30,
+    "movement": {
+      "type": "static"
+    }
   },
   {
     "id": "glowing_moss",
@@ -33,6 +45,9 @@
     "resourceId": "glowing_moss",
     "yieldQuantity": 3,
     "respawnSeconds": 15,
-    "movement": { "type": "static" }
+    "spawnIntervalSeconds": 12,
+    "movement": {
+      "type": "static"
+    }
   }
 ]
