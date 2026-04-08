@@ -1,10 +1,10 @@
 // String constants — avoids magic strings throughout the codebase
 
 export const ZONES = {
-  MANUAL: 'manual',
-  AUTO: 'auto',
-  PURGE: 'purge',
-  IDLE: 'idle',
+  MANUAL:   'manual',
+  AUTO:     'auto',
+  PURGE:    'purge',
+  RECHARGE: 'recharge',
 } as const
 
 export const TABS = {

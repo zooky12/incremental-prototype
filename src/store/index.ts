@@ -51,3 +51,5 @@ export const usePurchasedUpgrades = () => useGameStore(s => s.purchasedUpgrades)
 export const useDiscoveredRecipes = () => useGameStore(s => s.discoveredRecipes)
 export const useUnlockedZones = () => useGameStore(s => s.unlockedZones)
 export const useAttributeOverrides = () => useGameStore(s => s.attributeOverrides)
+export const useActiveCore = () =>
+  useGameStore(s => s.activeRun ? s.cores.find(c => c.id === s.activeRun!.coreId) ?? null : null)

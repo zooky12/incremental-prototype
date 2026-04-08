@@ -1,10 +1,11 @@
-export type CoreZone = 'manual' | 'auto' | 'purge' | 'idle'
+export type CoreZone = 'manual' | 'auto' | 'purge' | 'recharge'
 
 export interface DungeonCore {
   id: string
   dungeonId: string
   displayName: string
-  stability: number         // 0–100
+  stability: number   // 0–100, persistent; changes only on run end
+  energy: number      // 0–maxEnergy (from dungeon config)
   zone: CoreZone
 }
 
@@ -25,13 +26,13 @@ export interface ActiveNode {
 
 export interface DungeonRun {
   dungeonId: string
+  coreId: string             // links run to its core for endRun stability/energy updates
   depth: number
-  startedAt: number         // Date.now()
+  startedAt: number          // Date.now()
   nodes: ActiveNode[]
   torchTimeRemaining: number
   hp: number
-  maxHp: number             // resolved from attribute system at run start
-  stability: number
+  maxHp: number              // resolved from attribute system at run start
   materialsGained: Record<string, number>
-  nextEnemySpawnAt: number  // Date.now() timestamp for next enemy spawn
+  nextEnemySpawnAt: number   // Date.now() timestamp for next enemy spawn
 }

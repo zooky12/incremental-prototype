@@ -4,18 +4,20 @@ import { useCores, useGameStore, useUnlockedZones } from '@/store'
 import { DropZone } from './DropZone'
 import { CoreCard } from './CoreCard'
 import type { CoreZone } from '@/types/dungeon'
+import { useEffectiveBalance } from '@/hooks/useUpgrades'
 
-const ZONES: Array<{ zone: CoreZone; label: string; description: string; color: string }> = [
+const ACTIVE_ZONES: Array<{ zone: CoreZone; label: string; description: string; color: string }> = [
   { zone: 'manual', label: 'Manual', description: 'Explore yourself — best yield', color: 'text-accent' },
   { zone: 'auto',   label: 'Auto',   description: 'Runs itself — drains faster',   color: 'text-warning' },
   { zone: 'purge',  label: 'Purge',  description: 'Cleanup run — restores stability', color: 'text-primary' },
 ]
 
 export function CorePanel() {
-  const cores = useCores()
-  const assignCore = useGameStore(s => s.assignCore)
-  const addCore = useGameStore(s => s.addCore)
+  const cores         = useCores()
+  const assignCore    = useGameStore(s => s.assignCore)
+  const addCore       = useGameStore(s => s.addCore)
   const unlockedZones = useUnlockedZones()
+  const balance       = useEffectiveBalance()
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
@@ -25,14 +27,13 @@ export function CorePanel() {
     const { active, over } = event
     if (!over) return
     const targetZone = over.id as CoreZone
-    // Don't allow dropping into locked zones
-    if (!unlockedZones.includes(targetZone) && targetZone !== 'idle') return
+    if (!unlockedZones.includes(targetZone)) return
     assignCore(active.id as string, targetZone)
   }
 
+  const rechargeRate = balance.dungeon.energyRechargeRate
+
   return (
-    // pointer-events-none on the outer div so the transparent backdrop
-    // doesn't swallow canvas clicks; only interactive elements get pointer-events-auto
     <div className="absolute bottom-3 left-3 right-3 pointer-events-none">
       <div className="bg-surface/90 backdrop-blur rounded-lg border border-border p-3 pointer-events-auto">
         <div className="flex items-center justify-between mb-2">
@@ -47,19 +48,25 @@ export function CorePanel() {
 
         <DndContext sensors={sensors} onDragEnd={onDragEnd}>
           <div className="flex gap-2">
-            {/* Idle zone (holding area) */}
-            <div className="flex flex-col gap-2 w-28">
-              <div className="text-xs text-muted text-center">Idle</div>
-              {cores.filter(c => c.zone === 'idle').map(c => (
-                <CoreCard key={c.id} core={c} />
-              ))}
+            {/* Recharge zone — exhausted cores recharge energy here */}
+            <div className="w-28">
+              <DropZone
+                zone="recharge"
+                label="Recharge"
+                description={`+${rechargeRate}/s energy`}
+                accentColor="text-yellow-400"
+              >
+                {cores.filter(c => c.zone === 'recharge').map(c => (
+                  <CoreCard key={c.id} core={c} />
+                ))}
+              </DropZone>
             </div>
 
             <div className="w-px bg-border self-stretch" />
 
             {/* Active zones */}
             <div className="flex flex-1 gap-2">
-              {ZONES.map(({ zone, label, description, color }) => {
+              {ACTIVE_ZONES.map(({ zone, label, description, color }) => {
                 const isUnlocked = unlockedZones.includes(zone)
                 return (
                   <div key={zone} className="relative flex-1">

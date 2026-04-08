@@ -4,12 +4,12 @@
     "displayName": "Giant Rat",
     "spriteAsset": "enemy_rat.png",
     "hp": 2,
-    "hpCostToClick": 8,
-    "stabilityDrainPerSecond": 2.0,
+    "hpCostToClick": 4,
     "movement": {
       "type": "wander",
       "speed": 60,
-      "wanderRadius": 0.12
+      "wanderRadius": 0.12,
+      "idleTime": 1.5
     },
     "dropTable": [
       { "resourceId": "rat_tail", "chance": 0.5, "quantity": 1 },
@@ -22,11 +22,11 @@
     "spriteAsset": "enemy_spider.png",
     "hp": 1,
     "hpCostToClick": 5,
-    "stabilityDrainPerSecond": 1.5,
     "movement": {
       "type": "patrol",
       "speed": 90,
-      "wanderRadius": 0.2
+      "wanderRadius": 0.2,
+      "patrolTurnRate": 1.8
     },
     "dropTable": [
       { "resourceId": "spider_silk", "chance": 0.6, "quantity": 1 },
@@ -39,11 +39,11 @@
     "spriteAsset": "enemy_golem.png",
     "hp": 5,
     "hpCostToClick": 15,
-    "stabilityDrainPerSecond": 4.0,
     "movement": {
       "type": "wander",
       "speed": 30,
-      "wanderRadius": 0.08
+      "wanderRadius": 0.08,
+      "idleTime": 3.0
     },
     "dropTable": [
       { "resourceId": "rough_stone", "chance": 0.8, "quantity": 2 },

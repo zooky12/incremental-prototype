@@ -6,25 +6,21 @@ import type { PixiBridge } from '@/pixi/bridge/PixiBridge'
 import type { DungeonScene } from '@/pixi/scenes/DungeonScene'
 
 export function useDungeonRun() {
-  const startRun = useGameStore(s => s.startRun)
-  const endRun = useGameStore(s => s.endRun)
-  const clickNode = useGameStore(s => s.clickNode)
+  const startRun    = useGameStore(s => s.startRun)
+  const endRun      = useGameStore(s => s.endRun)
+  const clickNode   = useGameStore(s => s.clickNode)
   const destroyNode = useGameStore(s => s.destroyNode)
   const tickDungeon = useGameStore(s => s.tickDungeon)
-  const activeRun = useGameStore(s => s.activeRun)
+  const activeRun   = useGameStore(s => s.activeRun)
 
   const attrs = usePlayerAttributes()
 
   // Keep fresh refs for values used inside stable callbacks
-  const attrsRef = useRef(attrs)
-  attrsRef.current = attrs
-  const clickNodeRef = useRef(clickNode)
-  clickNodeRef.current = clickNode
-  const destroyNodeRef = useRef(destroyNode)
-  destroyNodeRef.current = destroyNode
-  const endRunRef = useRef(endRun)
-  endRunRef.current = endRun
-  const sceneRef = useRef<DungeonScene | null>(null)
+  const attrsRef      = useRef(attrs);      attrsRef.current      = attrs
+  const clickNodeRef  = useRef(clickNode);  clickNodeRef.current  = clickNode
+  const destroyNodeRef = useRef(destroyNode); destroyNodeRef.current = destroyNode
+  const endRunRef     = useRef(endRun);     endRunRef.current     = endRun
+  const sceneRef      = useRef<DungeonScene | null>(null)
 
   // Called by DungeonView after bridge + scene are created.
   // Registers all bridge event handlers and returns a cleanup function.
@@ -73,7 +69,7 @@ export function useDungeonRun() {
     scene.syncNodeStates(activeRun.nodes)
     scene.updateStats({
       hp: activeRun.hp,
-      stability: activeRun.stability,
+      stability: 100,  // stability no longer changes mid-run; HUD reads from core directly
       torchTime: activeRun.torchTimeRemaining,
     })
   })
@@ -97,9 +93,9 @@ export function useDungeonRun() {
     if (!activeRun) prevNodeCountRef.current = 0
   }, [activeRun])
 
-  // Game logic tick
+  // Game logic tick — always runs so recharge ticks even outside a run
   useGameLoop((delta) => {
-    if (activeRun) tickDungeon(delta)
+    tickDungeon(delta)
   })
 
   const beginRun = useCallback((dungeonId: string, depth = 1) => {

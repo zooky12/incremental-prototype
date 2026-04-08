@@ -7,17 +7,38 @@ export const lerp = (a: number, b: number, t: number): number =>
 export const rollChance = (chance: number): boolean =>
   Math.random() < chance
 
-/** Roll a drop table, returns all items that dropped */
+/**
+ * Roll a drop table with an optional stability multiplier applied to each entry's chance.
+ * multiplier > 1 increases drop frequency; multiplier < 1 reduces it.
+ * When effectiveChance > 1.0 the floor is guaranteed and the remainder is the bonus roll chance.
+ */
 export function rollDropTable(
-  table: Array<{ resourceId: string; chance: number; quantity: number }>
+  table: Array<{ resourceId: string; chance: number; quantity: number }>,
+  multiplier = 1
 ): Record<string, number> {
   const result: Record<string, number> = {}
   for (const entry of table) {
-    if (rollChance(entry.chance)) {
-      result[entry.resourceId] = (result[entry.resourceId] ?? 0) + entry.quantity
+    const effectiveChance = entry.chance * multiplier
+    const guaranteed = Math.floor(effectiveChance)
+    const remainder  = effectiveChance - guaranteed
+    let drops = guaranteed
+    if (remainder > 0 && Math.random() < remainder) drops++
+    if (drops > 0) {
+      result[entry.resourceId] = (result[entry.resourceId] ?? 0) + drops * entry.quantity
     }
   }
   return result
+}
+
+/**
+ * Apply a stability multiplier to a resource yield count.
+ * Handles fractional results probabilistically (e.g. 1.4 → always 1, 40% chance of 2).
+ */
+export function applyMultiplierToYield(baseYield: number, multiplier: number): number {
+  const effective = baseYield * multiplier
+  const base      = Math.floor(effective)
+  const bonus     = effective - base
+  return base + (bonus > 0 && Math.random() < bonus ? 1 : 0)
 }
 
 export function formatNumber(n: number): string {

@@ -44,7 +44,7 @@
   {
     "id": "stability_drain_reduction",
     "displayName": "Reinforced Walls",
-    "description": "Reduces manual exploration stability drain.",
+    "description": "Reduces stability lost per failed run.",
     "category": "dungeon",
     "maxLevel": 3,
     "unlockCondition": {
@@ -53,9 +53,9 @@
       "level": 1
     },
     "effect": {
-      "stat": "dungeon.stabilityDrainManual",
+      "stat": "dungeon.stabilityLossPerRun",
       "operation": "add",
-      "valuePerLevel": [-0.1, -0.15, -0.15]
+      "valuePerLevel": [-3, -4, -5]
     },
     "costCurve": { "type": "exponential", "base": 150, "exponent": 2.3, "resource": "gold" }
   },

@@ -2,6 +2,7 @@ import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import type { DungeonCore } from '@/types/dungeon'
 import { ProgressBar } from '@/components/shared/ProgressBar'
+import { getDungeonById } from '@/utils/configLoader'
 
 interface CoreCardProps {
   core: DungeonCore
@@ -17,7 +18,10 @@ export function CoreCard({ core }: CoreCardProps) {
     transform: CSS.Translate.toString(transform),
   }
 
+  const dungeon      = getDungeonById(core.dungeonId)
+  const maxEnergy    = dungeon?.maxEnergy ?? 100
   const stabilityPct = core.stability / 100
+  const energyPct    = core.energy / maxEnergy
 
   return (
     <div
@@ -39,6 +43,13 @@ export function CoreCard({ core }: CoreCardProps) {
         color={stabilityPct > 0.5 ? 'bg-accent' : stabilityPct > 0.25 ? 'bg-warning' : 'bg-danger'}
         height={4}
       />
+      <div className="mt-1">
+        <ProgressBar
+          value={energyPct}
+          color="bg-yellow-400"
+          height={4}
+        />
+      </div>
     </div>
   )
 }

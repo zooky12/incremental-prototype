@@ -1,6 +1,8 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js'
 import type { ActiveNode } from '@/types/dungeon'
 import type { ResourceConfig } from '@/types/config'
+import { MovementController } from '@/pixi/systems/MovementController'
+import type { ResourceTarget } from '@/pixi/systems/MovementController'
 
 // Visual representation of a resource node in the dungeon canvas.
 // Clicks are handled by DungeonScene's click layer — no bridge import needed here.
@@ -10,12 +12,16 @@ export class ResourceNode extends Container {
   private glowRing: Graphics
   private hoverAnim = 0
   private _depleted = false
+  private movement: MovementController
 
   nodeId: string
 
   constructor(node: ActiveNode, config: ResourceConfig) {
     super()
     this.nodeId = node.id
+    // Position is set externally by DungeonScene after construction;
+    // MovementController is initialised at (0,0) and updated on first tick.
+    this.movement = new MovementController(config.movement, 0, 0)
 
     this.glowRing = new Graphics()
     this.addChild(this.glowRing)
@@ -45,8 +51,13 @@ export class ResourceNode extends Container {
     this.glowRing.alpha = depleted ? 0.3 : 1
   }
 
-  tick(_delta: number) {
+  tick(delta: number, canvasW = 0, canvasH = 0, resources: ResourceTarget[] = []) {
     if (this._depleted) return
+
+    const pos = this.movement.tick(delta, this.x, this.y, canvasW, canvasH, resources)
+    this.x = pos.x
+    this.y = pos.y
+
     const pulse = Math.sin(performance.now() / 800) * 0.05
     this.scale.set(1 + pulse + this.hoverAnim * 0.1)
 

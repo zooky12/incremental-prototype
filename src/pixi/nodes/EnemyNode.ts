@@ -1,6 +1,8 @@
 import { Container, Graphics, Text, TextStyle } from 'pixi.js'
 import type { ActiveNode } from '@/types/dungeon'
 import type { EnemyConfig } from '@/types/config'
+import { MovementController } from '@/pixi/systems/MovementController'
+import type { ResourceTarget } from '@/pixi/systems/MovementController'
 
 // Visual representation of an enemy node in the dungeon canvas.
 // Clicks are handled by DungeonScene's click layer — no bridge import needed here.
@@ -13,24 +15,18 @@ export class EnemyNode extends Container {
   nodeId: string
   private currentHp: number
   private maxHp: number
-  private config: EnemyConfig
-
-  private wanderTargetX = 0
-  private wanderTargetY = 0
-  private wanderTimer = 0
+  private movement: MovementController
 
   private flashTimer = 0
 
   constructor(node: ActiveNode, config: EnemyConfig, canvasW: number, canvasH: number) {
     super()
     this.nodeId = node.id
-    this.config = config
     this.currentHp = node.hp
     this.maxHp = config.hp
     this.x = node.x * canvasW
     this.y = node.y * canvasH
-    this.wanderTargetX = this.x
-    this.wanderTargetY = this.y
+    this.movement = new MovementController(config.movement, this.x, this.y)
 
     this.glowRing = new Graphics()
     this.addChild(this.glowRing)
@@ -80,7 +76,7 @@ export class EnemyNode extends Container {
     this.flashTimer = 0.15
   }
 
-  tick(delta: number, canvasW: number, canvasH: number) {
+  tick(delta: number, canvasW: number, canvasH: number, resources: ResourceTarget[] = []) {
     // Flash on hit
     if (this.flashTimer > 0) {
       this.flashTimer -= delta
@@ -92,24 +88,10 @@ export class EnemyNode extends Container {
       this.flashTimer = 0
     }
 
-    // Wander movement — full canvas, not anchored to spawn zone
-    if (this.config.movement.type === 'wander' || this.config.movement.type === 'patrol') {
-      this.wanderTimer -= delta
-      if (this.wanderTimer <= 0) {
-        this.wanderTargetX = 30 + Math.random() * (canvasW - 60)
-        this.wanderTargetY = 30 + Math.random() * (canvasH - 110)
-        this.wanderTimer = 1.5 + Math.random() * 2
-      }
-
-      const speed = (this.config.movement.speed ?? 60) * delta
-      const dx = this.wanderTargetX - this.x
-      const dy = this.wanderTargetY - this.y
-      const dist = Math.sqrt(dx * dx + dy * dy)
-      if (dist > 1) {
-        this.x += (dx / dist) * Math.min(speed, dist)
-        this.y += (dy / dist) * Math.min(speed, dist)
-      }
-    }
+    // Movement
+    const pos = this.movement.tick(delta, this.x, this.y, canvasW, canvasH, resources)
+    this.x = pos.x
+    this.y = pos.y
 
     // Pulsing glow
     this.glowRing.clear()

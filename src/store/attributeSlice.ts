@@ -15,7 +15,7 @@ export interface AttributeSlice {
 export const createAttributeSlice: StateCreator<GameState, [], [], AttributeSlice> = (set) => ({
   attributeOverrides: {},
   runBuffs: {},
-  unlockedZones: ['idle', 'manual'],
+  unlockedZones: ['recharge', 'manual'],
 
   setAttributeOverride(id, value) {
     set(state => {

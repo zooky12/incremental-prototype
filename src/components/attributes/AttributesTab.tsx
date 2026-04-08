@@ -41,11 +41,53 @@ export function AttributesTab() {
     return acc
   }, {})
 
+  function handleResetAll() {
+    if (window.confirm('Erase ALL progress? This cannot be undone.')) {
+      // Reset Zustand state to initial values BEFORE clearing storage.
+      // Zustand's persist subscription fires asynchronously after setState and would
+      // re-write the old in-memory state back to localStorage if we only called removeItem.
+      useGameStore.setState({
+        // dungeon
+        activeRun: null,
+        cores: [],
+        totalRunsCompleted: 0,
+        dungeonPrestigeLevel: 0,
+        // resources
+        materials: {},
+        potions: {},
+        gold: 0,
+        // crafting
+        session: null,
+        pourHistory: [],
+        apprenticePatterns: [],
+        // shop
+        purchasedUpgrades: {},
+        discoveredRecipes: [],
+        reputation: 0,
+        gamePrestigeLevel: 0,
+        // attributes
+        attributeOverrides: {},
+        runBuffs: {},
+        unlockedZones: ['recharge', 'manual'],
+      }, true)
+      localStorage.removeItem('alchemy-empire-save')
+      window.location.reload()
+    }
+  }
+
   return (
     <div className="p-4 space-y-6 max-w-xl">
-      <div>
-        <h2 className="text-primary font-bold text-sm uppercase tracking-wider mb-1">Debug — Attributes</h2>
-        <p className="text-muted text-xs">Override values are absolute and replace all computed modifiers.</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h2 className="text-primary font-bold text-sm uppercase tracking-wider mb-1">Debug — Attributes</h2>
+          <p className="text-muted text-xs">Override values are absolute and replace all computed modifiers.</p>
+        </div>
+        <button
+          onClick={handleResetAll}
+          className="shrink-0 text-xs bg-danger/20 hover:bg-danger/30 text-danger border border-danger/40 hover:border-danger rounded px-3 py-1.5 transition-colors"
+        >
+          Reset All Progress
+        </button>
       </div>
 
       {/* Zone Unlocks */}

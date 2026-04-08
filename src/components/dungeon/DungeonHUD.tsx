@@ -1,16 +1,17 @@
-import { useActiveRun } from '@/store'
+import { useActiveRun, useActiveCore } from '@/store'
 import { ProgressBar } from '@/components/shared/ProgressBar'
 import { useEffectiveBalance } from '@/hooks/useUpgrades'
 
 export function DungeonHUD() {
-  const run = useActiveRun()
+  const run     = useActiveRun()
+  const core    = useActiveCore()
   const balance = useEffectiveBalance()
 
   if (!run) return null
 
-  const hpPct = run.hp / run.maxHp
-  const torchPct = run.torchTimeRemaining / balance.dungeon.torchDurationSeconds
-  const stabilityPct = run.stability / balance.dungeon.maxStability
+  const hpPct       = run.hp / run.maxHp
+  const torchPct    = run.torchTimeRemaining / balance.dungeon.torchDurationSeconds
+  const stabilityPct = (core?.stability ?? 100) / 100
 
   return (
     <div className="absolute top-3 left-3 right-3 flex flex-col gap-2 pointer-events-none">
@@ -37,11 +38,11 @@ export function DungeonHUD() {
           />
         </div>
 
-        {/* Stability */}
+        {/* Stability — shows current core stability (affects drop rates) */}
         <div className="flex-1 bg-surface/80 backdrop-blur rounded p-2">
           <ProgressBar
             value={stabilityPct}
-            label={`Stability ${Math.ceil(run.stability)}%`}
+            label={`Stability ${Math.round((core?.stability ?? 100))}%`}
             color={stabilityPct > 0.5 ? 'bg-accent' : stabilityPct > 0.25 ? 'bg-warning' : 'bg-danger'}
             height={10}
             glow={stabilityPct < 0.2}

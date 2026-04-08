@@ -4,6 +4,8 @@
     "displayName": "Cave of Roots",
     "backgroundAsset": "bg_cave.png",
     "coreSlots": 2,
+    "maxEnergy": 100,
+    "energyPerRun": 40,
     "unlockCondition": null,
     "depths": [
       {

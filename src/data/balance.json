@@ -2,12 +2,12 @@
   "dungeon": {
     "torchDurationSeconds": 10,
     "baseHp": 10,
-    "stabilityDrainManual": 0.4,
-    "stabilityDrainAuto": 1.5,
-    "stabilityRestorePurge": 2.5,
-    "stabilityGainOnKill": 5,
+    "stabilityLossPerRun": 15,
+    "stabilityGainPerRun": 10,
+    "resourceStabilityEffect": -0.5,
+    "enemyStabilityEffect": 0.8,
+    "energyRechargeRate": 8,
     "hpCostPerEnemyClick": 10,
-    "enemyStabilityDrainPerSecond": 2.5,
     "screenShakeIntensity": 7,
     "screenShakeDecay": 0.88,
     "maxStability": 100

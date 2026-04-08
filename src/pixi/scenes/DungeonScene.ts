@@ -6,6 +6,7 @@ import { ParticlePool } from '@/pixi/fx/ParticlePool'
 import { ScreenShake } from '@/pixi/systems/ScreenShake'
 import { getEnemyById, getResourceById, getBalance } from '@/utils/configLoader'
 import type { ActiveNode, DungeonRun } from '@/types/dungeon'
+import type { ResourceTarget } from '@/pixi/systems/MovementController'
 
 interface NodeClickResult {
   hpLost: number
@@ -209,8 +210,14 @@ export class DungeonScene {
   private tick() {
     const delta = this.ticker.deltaMS / 1000
 
-    for (const n of this.resourceNodes.values()) n.tick(delta)
-    for (const n of this.enemyNodes.values()) n.tick(delta, this.canvasW, this.canvasH)
+    // Build active resource list for chase_node enemies
+    const activeResources: ResourceTarget[] = []
+    for (const [id, rNode] of this.resourceNodes.entries()) {
+      if (!rNode.isDepletedState) activeResources.push({ id, x: rNode.x, y: rNode.y })
+    }
+
+    for (const n of this.resourceNodes.values()) n.tick(delta, this.canvasW, this.canvasH)
+    for (const n of this.enemyNodes.values()) n.tick(delta, this.canvasW, this.canvasH, activeResources)
 
     // Enemy-resource collision
     for (const eNode of this.enemyNodes.values()) {

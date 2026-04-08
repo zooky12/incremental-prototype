@@ -7,12 +7,12 @@ export interface BalanceConfig {
   dungeon: {
     torchDurationSeconds: number
     baseHp: number
-    stabilityDrainManual: number
-    stabilityDrainAuto: number
-    stabilityRestorePurge: number
-    stabilityGainOnKill: number
+    stabilityLossPerRun: number        // stability lost when exiting with live enemies
+    stabilityGainPerRun: number        // stability gained when exiting with no live enemies
+    resourceStabilityEffect: number    // slope for resource yield multiplier (negative = less at low stability)
+    enemyStabilityEffect: number       // slope for enemy drop multiplier (positive = more at low stability)
+    energyRechargeRate: number         // energy per second while in recharge zone
     hpCostPerEnemyClick: number
-    enemyStabilityDrainPerSecond: number
     screenShakeIntensity: number
     screenShakeDecay: number
     maxStability: number
@@ -34,7 +34,9 @@ export type MovementType = 'static' | 'wander' | 'chase_node' | 'patrol'
 export interface MovementConfig {
   type: MovementType
   speed?: number
-  wanderRadius?: number
+  wanderRadius?: number   // kept for back-compat; not used by MovementController
+  idleTime?: number       // seconds to idle after arriving (wander) or losing target (chase_node)
+  patrolTurnRate?: number // amplitude of sinusoidal heading change for patrol
 }
 
 export interface DropEntry {
@@ -49,7 +51,6 @@ export interface EnemyConfig {
   spriteAsset: string
   hp: number
   hpCostToClick: number
-  stabilityDrainPerSecond: number
   movement: MovementConfig
   dropTable: DropEntry[]
 }
@@ -85,6 +86,8 @@ export interface DungeonConfig {
   displayName: string
   backgroundAsset: string
   coreSlots: number
+  maxEnergy: number
+  energyPerRun: number
   unlockCondition: UnlockCondition | null
   depths: DungeonDepth[]
 }

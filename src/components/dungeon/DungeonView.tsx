@@ -6,6 +6,7 @@ import { DungeonHUD } from './DungeonHUD'
 import { CorePanel } from './CorePanel'
 import { PixiBridge } from '@/pixi/bridge/PixiBridge'
 import { DungeonScene } from '@/pixi/scenes/DungeonScene'
+import { getDungeonById } from '@/utils/configLoader'
 import type { Application as PixiApplication } from 'pixi.js'
 
 export function DungeonView() {
@@ -14,11 +15,22 @@ export function DungeonView() {
   const sceneLocalRef = useRef<DungeonScene | null>(null)
 
   const activeRun = useActiveRun()
-  const cores = useCores()
+  const cores     = useCores()
   const { initBridge, beginRun, endRun } = useDungeonRun()
 
-  const hasManualCore = cores.some(c => c.zone === 'manual')
   const insideDungeon = activeRun !== null
+
+  // Entry guard logic
+  const manualCore   = cores.find(c => c.zone === 'manual')
+  const dungeon      = getDungeonById('cave_of_roots')
+  const canEnter     = !!manualCore
+    && manualCore.stability > 0
+    && manualCore.energy >= (dungeon?.energyPerRun ?? 0)
+
+  let disabledReason = ''
+  if (!manualCore)                                         disabledReason = 'Add a core to the Manual zone to enter'
+  else if (manualCore.stability <= 0)                      disabledReason = 'Dungeon is unstable — recover stability first'
+  else if (manualCore.energy < (dungeon?.energyPerRun ?? 0)) disabledReason = 'Dungeon is exhausted — move to Recharge zone'
 
   // Create bridge + scene after PixiJS initializes, then register event handlers
   useEffect(() => {
@@ -27,13 +39,11 @@ export function DungeonView() {
     if (!app || sceneLocalRef.current) return
 
     const bridge = new PixiBridge()
-    const scene = new DungeonScene(app as PixiApplication, bridge)
+    const scene  = new DungeonScene(app as PixiApplication, bridge)
     sceneLocalRef.current = scene
 
-    // Wire bridge → store handlers (this is when bridge.current is actually available)
     const cleanupHandlers = initBridge(bridge, scene)
 
-    // Spawn nodes if a run was already active when canvas came online
     if (activeRun) scene.spawnNodesFromRun(activeRun)
 
     return () => {
@@ -50,7 +60,7 @@ export function DungeonView() {
   useEffect(() => {
     if (!sceneLocalRef.current || !activeRun) return
     sceneLocalRef.current.spawnNodesFromRun(activeRun)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeRun?.startedAt])
 
   return (
@@ -86,11 +96,11 @@ export function DungeonView() {
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="pointer-events-auto flex flex-col items-center gap-2">
             <button
-              onClick={() => hasManualCore && beginRun('cave_of_roots', 1)}
-              disabled={!hasManualCore}
+              onClick={() => canEnter && beginRun('cave_of_roots', 1)}
+              disabled={!canEnter}
               className={`
                 px-8 py-4 rounded-lg text-lg font-bold transition-all duration-200
-                ${hasManualCore
+                ${canEnter
                   ? 'bg-primary/20 hover:bg-primary/30 text-primary border-2 border-primary/50 hover:border-primary shadow-glow cursor-pointer'
                   : 'bg-surface/50 text-muted border-2 border-border cursor-not-allowed opacity-60'
                 }
@@ -98,8 +108,8 @@ export function DungeonView() {
             >
               Enter Dungeon
             </button>
-            {!hasManualCore && (
-              <p className="text-xs text-muted">Add a core to the Manual zone to enter</p>
+            {!canEnter && disabledReason && (
+              <p className="text-xs text-muted">{disabledReason}</p>
             )}
           </div>
         </div>

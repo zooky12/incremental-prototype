@@ -15,7 +15,9 @@
       "Bash(timeout 10 pnpm exec vite build)",
       "Bash(curl -s http://localhost:5174/src/main.tsx)",
       "Bash(pnpm build:*)",
-      "Bash(pnpm add:*)"
+      "Bash(pnpm add:*)",
+      "Bash(pnpm dev:*)",
+      "Bash(xargs grep:*)"
     ]
   }
 }
